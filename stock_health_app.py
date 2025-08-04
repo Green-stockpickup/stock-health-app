@@ -6,7 +6,6 @@ import talib
 import warnings
 import datetime
 import pytz
-import matplotlib.pyplot as plt
 from colorama import Fore, Style, init
 import re
 import unicodedata
@@ -108,8 +107,12 @@ def calculate_indicators(data):
     data['Rolling_Mean_5'] = data['Close'].rolling(window=5).mean()
     
     data = data.ffill().bfill()
-    if data.isnull().mean().mean() > 0:
-        warnings.warn("Some NaNs remain after ffill, data may be incomplete.")
+    nan_ratio = data.isnull().mean().mean()
+    if nan_ratio > 0.2:
+        warnings.warn(f"High NaN ratio ({nan_ratio:.2f}) after fill, data may be unreliable.")
+        return None
+    if nan_ratio > 0:
+        warnings.warn("Some NaNs remain after ffill, but proceeding.")
     
     return data
 
@@ -864,9 +867,7 @@ def get_stock_data(ticker, period="3y", interval="1d"):
             return None
         data = data.reset_index(drop=False).drop_duplicates(subset='Date').set_index('Date')
         data = calculate_indicators(data)
-        nan_ratio = data.isnull().mean().mean()
-        if nan_ratio > 0.2:
-            warnings.warn(f"High NaN ratio ({nan_ratio:.2f}) in data for {ticker}")
+        if data is None:  # 若 NaN 過高，返回 None
             return None
         return data
     except Exception as e:
