@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: stock-health-app
+    env: python
+    plan: free
+    buildCommand: |
+      apt-get update && apt-get install -y libta-lib0 libta-lib-dev
+      pip install -r requirements.txt
+    startCommand: streamlit run stock_health_app.py --server.port $PORT --server.address 0.0.0.0
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.13.5
+    aptPkgs:
+      - libta-lib0
+      - libta-lib-dev
