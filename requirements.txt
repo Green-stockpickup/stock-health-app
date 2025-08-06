@@ -6,7 +6,6 @@ pandas-ta==0.3.14b0
 colorama==0.4.6
 arch==7.2.0
 scipy==1.16.0
-matplotlib==3.10.3
 gunicorn==23.0.0
 gevent==24.10.2
 xgboost==3.0.2
