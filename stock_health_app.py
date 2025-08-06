@@ -18,7 +18,6 @@ from health_score import calculate_health_score
 from models import predict_price_direction
 from conditions import condition_l_crash_risk
 from config import Config, is_market_open
-import plotly.graph_objects as go
 
 warnings.filterwarnings("ignore")
 
@@ -335,15 +334,6 @@ def main():
         st.write(f"  - {(' | '.join(bonus_details) if bonus_details else '無')}")
         
         st.write(f"📅 數據獲取日期: {data.index[-1].strftime('%Y-%m-%d')}")
-        
-        # Plotly 圖表
-        fig = go.Figure()
-        fig.add_trace(go.Scatter(x=data.index[-50:], y=data['Close'].tail(50), mode='lines', name='Close'))
-        fig.add_trace(go.Scatter(x=data.index[-50:], y=data['SMA20'].tail(50), mode='lines', name='SMA20'))
-        fig.add_trace(go.Scatter(x=data.index[-50:], y=data['UpperBB'].tail(50), mode='lines', name='Upper BB'))
-        fig.add_trace(go.Scatter(x=data.index[-50:], y=data['LowerBB'].tail(50), mode='lines', name='Lower BB'))
-        fig.update_layout(title=f"{ticker} 價格與布林通道", xaxis_title="日期", yaxis_title="價格")
-        st.plotly_chart(fig)
 
 if __name__ == "__main__":
     main()
