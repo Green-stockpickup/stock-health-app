@@ -4,7 +4,6 @@ from conditions import *  # Import all conditions
 from sklearn.tree import DecisionTreeClassifier, export_text
 import numpy as np
 import warnings
-import talib
 from indicators import calculate_target_stop_loss
 
 def calculate_health_score(data, market_params=None, ticker="", market_condition="Unknown"):
@@ -83,35 +82,21 @@ def calculate_health_score(data, market_params=None, ticker="", market_condition
     
     # Full bonus logic
     if condition_scores["Volume and K-line"][0] == 1.0 and condition_scores["Volume and K-line"][2] == "Bullish Candle":
-        bonus_score += 0.5
-        bonus_details.append("Bonus: Strong K-line and volume (+10)")
-    
-    if condition_scores["RSI (14-day)"][0] == 1.0 and condition_scores["MACD (12,26,9)"][0] == 1.0:
-        bonus_score += 0.5
-        bonus_details.append("Bonus: Healthy RSI and MACD (+10)")
-    
-    if condition_scores["Volume and K-line"][0] == 1.0 and condition_scores["Volume and K-line"][2] == "Doji":
-        sma5 = talib.SMA(data['Close'].values, Config.SMA_SHORT)
-        atr = talib.ATR(data['High'].values, data['Low'].values, data['Close'].values, Config.ATR_PERIOD)
-        adx = talib.ADX(data['High'].values, data['Low'].values, data['Close'].values, timeperiod=Config.ADX_PERIOD)
-        index = -1 if is_market_open() else -2
-        if len(sma5) >= 5:
-            sma_diff = sma5[index] - sma5[index-4]
-            atr_value = atr[index]
-            adx_value = adx[index]
-            warning_strength = "Strong" if adx_value > 30 else "Weak" if adx_value <= 20 else ""
-            
-            if sma_diff > 0 and adx_value > 30:
-                bonus_score -= 0.25
-                warnings_list.append(f"Warning: Doji with high volume: {warning_strength} Reversal risk")
-            elif sma_diff < 0:
-                bonus_score += 0.25
-                bonus_details.append("Bonus: Doji with high volume in downtrend (+5)")
-                warnings_list.append(f"Warning: Doji with high volume: {warning_strength} Rebound potential")
-            elif abs(sma_diff) < 0.5 * atr_value:
-                warnings_list.append(f"Warning: Doji with high volume: Market indecision")
-    
-    if condition_scores["Volume and K-line"][0] <= 0.25 and condition_scores["Volume and K-line"][2] == "Doji":
+        bonus_score += 0.25
+        bonus_details.append("Bonus: Bullish candle with high volume (+5)")
+    if condition_scores["MACD (12,26,9)"][0] == 1.0:
+        bonus_score += 0.25
+        bonus_details.append("Bonus: MACD bullish crossover (+5)")
+    if condition_scores["RSI (14-day)"][0] == 1.0 and condition_scores["Stochastic Oscillator (14,3,3)"][0] == 1.0:
+        bonus_score += 0.25
+        bonus_details.append("Bonus: RSI and Stochastic bullish (+5)")
+    if condition_scores["Bollinger Bands (Close vs Upper/Middle/Lower)"][0] == 1.0 and condition_scores["CCI (20-day)"][0] == 1.0:
+        bonus_score += 0.25
+        bonus_details.append("Bonus: Bollinger and CCI bullish (+5)")
+    if condition_scores["MFI (14-day)"][0] == 1.0 and condition_scores["OBV (On-Balance Volume)"][0] == 1.0:
+        bonus_score += 0.25
+        bonus_details.append("Bonus: MFI and OBV bullish (+5)")
+    if condition_scores["Volume and K-line"][0] < 1.0 and condition_scores["Volume and K-line"][2] == "Doji":
         bonus_score += 0.25
         bonus_details.append("Bonus: Doji with low volume (+5)")
         warnings_list.append("Warning: Doji with low volume: Weak momentum")
